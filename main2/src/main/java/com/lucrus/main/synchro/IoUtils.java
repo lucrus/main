@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -32,8 +31,6 @@ import javax.crypto.spec.SecretKeySpec;
  * @author luca.russo
  */
 public class IoUtils {
-    private static boolean mappa = false;
-    private static HashMap<String, String> files = null;
     private static String KEY = "ACapocchiaRossa9";
 
     /**
