@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Main</string>
+    <string name="wait">Operazione in corso...</string>
+</resources>
