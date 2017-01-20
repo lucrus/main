@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <integer name="key">1</integer>
+    <integer name="id">2</integer>
+    <integer name="cbSelectDoc">3</integer>
+    <integer name="valid">4</integer>
+    <integer name="validatorNotEmpty">5</integer>
+    <integer name="validatorNotEmptyWhen">6</integer>
+</resources>

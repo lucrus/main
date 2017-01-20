@@ -10,6 +10,7 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences.Editor;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -20,6 +21,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.Settings.Secure;
 import android.telephony.TelephonyManager;
+import android.text.Html;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -482,6 +484,10 @@ public class Utility {
         return "*/*";
     }
 
+    public static ProgressDialog showWaitDialog(Context ctx) {
+        return showWaitDialog(ctx, true);
+    }
+
     public static ProgressDialog showWaitDialog(Context ctx, boolean indeterminate) {
 //      ProgressDialog progress = (ProgressDialog)
 //              new ProgressDialog.Builder(ctx)
@@ -686,6 +692,28 @@ public class Utility {
         bd = bd.setScale(2, BigDecimal.ROUND_HALF_UP);
         return bd.doubleValue();
     }
+
+    public static boolean isNetworkConnected(Context ctx) {
+        return IoUtils.isNetworkConnected(ctx);
+    }
+
+    public static Intent getOpenUrlInExternalBrowserIntent(String url) {
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        return i;
+    }
+
+    public static Intent getSendMailIntent(String[] addresses, String subject, String body) {
+        Intent intent = new Intent(android.content.Intent.ACTION_SEND);
+        intent.setType("text/html");
+        if (addresses != null && addresses.length > 0) {
+            intent.putExtra(Intent.EXTRA_EMAIL, addresses);
+        }
+        intent.putExtra(android.content.Intent.EXTRA_SUBJECT, Html.fromHtml(subject).toString());
+        intent.putExtra(android.content.Intent.EXTRA_TEXT, Html.fromHtml(body));
+        return intent;
+    }
+
 
 
 }

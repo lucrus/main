@@ -22,7 +22,7 @@
             android:layout_margin="5sp"
             android:visibility="gone" />
 
-        <com.lucrus.digivents.fontawesome.TextAwesome
+        <com.lucrus.main.fontawesome.TextAwesome
             android:id="@+id/ivFaIcon"
             style="@style/FaIcon"
             android:visibility="gone" />
@@ -51,7 +51,7 @@
             android:contentDescription="@string/hello"
             android:src="@drawable/freccialista" />
             -->
-    <com.lucrus.digivents.fontawesome.TextAwesome
+    <com.lucrus.main.fontawesome.TextAwesome
         android:id="@+id/ivFrecciaLista"
         android:layout_width="60sp"
         android:layout_height="50sp"

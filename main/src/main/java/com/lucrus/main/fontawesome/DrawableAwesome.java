@@ -122,19 +122,22 @@ public class DrawableAwesome extends Drawable {
             return this;
         }
 
-        public void setAntiAliased(boolean antiAliased) {
+        public Builder setAntiAliased(boolean antiAliased) {
             this.antiAliased = antiAliased;
+            return this;
         }
 
-        public void setFakeBold(boolean fakeBold) {
+        public Builder setFakeBold(boolean fakeBold) {
             this.fakeBold = fakeBold;
+            return this;
         }
 
-        public void setShadow(float radius, float dx, float dy, int color) {
+        public Builder setShadow(float radius, float dx, float dy, int color) {
             this.shadowRadius = radius;
             this.shadowDx = dx;
             this.shadowDy = dy;
             this.shadowColor = color;
+            return this;
         }
 
         public DrawableAwesome build() {
