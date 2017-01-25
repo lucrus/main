@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -30,6 +31,8 @@ import android.widget.TextView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.lucrus.main.R;
+import com.lucrus.main.Utility;
+import com.lucrus.main.activities.PopupListActivity;
 import com.lucrus.main.fontawesome.DrawableAwesome;
 import com.lucrus.main.validation.Validator;
 import com.lucrus.main.validation.ValidatorFactory;
@@ -55,14 +58,27 @@ public class EditText extends RelativeLayout {
     private List<Validator> mValidators;
     private Boolean mValid;
     private List<String> mRelatedFields;
-    private boolean mCheck;
+    private boolean mCheck, mList;
+    private TipoDato mTipoDato;
+    private ArrayList<PopupListActivity.ListItem> mListItems = new ArrayList<>();
+    private int mListRequestCode;
 
     private static final Random RANDOM = new Random();
 
     private OnClickListener mClickListener = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            handleOn();
+            if (mList) {
+                Intent i = new Intent(getContext(), PopupListActivity.class);
+                i.putParcelableArrayListExtra(PopupListActivity.ITEMS_NAME, mListItems);
+                try {
+                    ((Activity) getContext()).startActivityForResult(i, mListRequestCode);
+                } catch (Exception e) {
+                    Utility.log(getContext(), e);
+                }
+            } else {
+                handleOn();
+            }
         }
     };
 
@@ -76,6 +92,18 @@ public class EditText extends RelativeLayout {
         super(context);
         mCheck = check;
         init(context);
+    }
+
+    public EditText(Context context, TipoDato tipoDato) {
+        super(context);
+        mTipoDato = tipoDato;
+        if (mTipoDato == TipoDato.Booleano) {
+            mCheck = true;
+        } else if (mTipoDato == TipoDato.Lista) {
+            mList = true;
+        }
+        init(context);
+        setType(mTipoDato);
     }
 
     public EditText(Context context, AttributeSet attrs) {
@@ -119,6 +147,13 @@ public class EditText extends RelativeLayout {
                 et.setBackground(mShape);
             } else {
                 et.setBackgroundDrawable(mShape);
+            }
+
+            if (mList) {
+                et.setEnabled(false);
+                et.setCompoundDrawablesWithIntrinsicBounds(null, null,
+                        new DrawableAwesome.Builder(context, R.string.fa_chevron_down).setFakeBold(false).setSize(20).build()
+                        , null);
             }
         }
         tvError = new TextView(context);
@@ -534,6 +569,25 @@ public class EditText extends RelativeLayout {
         }
     }
 
+    public void setType(TipoDato td) {
+        mTipoDato = td;
+        switch (td) {
+            case Numerico:
+                setInputType(InputType.TYPE_CLASS_NUMBER);
+                break;
+            case Booleano:
+                break;
+            case Lista:
+                break;
+            case Data:
+                et.setInputType(InputType.TYPE_DATETIME_VARIATION_DATE);
+                break;
+            case Testo:
+            default:
+                et.setInputType(InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS);
+        }
+    }
+
     public void setInputType(int inputType) {
         if (et != null) {
             et.setInputType(inputType);
@@ -636,4 +690,30 @@ public class EditText extends RelativeLayout {
     public Boolean isValid() {
         return mValid;
     }
+
+    public void onListActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == mListRequestCode && resultCode == Activity.RESULT_OK) {
+            PopupListActivity.ListItem li = data.getParcelableExtra("data");
+            et.setText(li.getId());
+        }
+    }
+
+    public void setListRequestCode(int listRequestCode) {
+        this.mListRequestCode = listRequestCode;
+    }
+
+    public void setListItems(List<PopupListActivity.ListItem> listItems) {
+        if (mListItems == null) return;
+        this.mListItems.addAll(listItems);
+    }
+
+    public enum TipoDato {
+        None,
+        Testo,
+        Numerico,
+        Lista,
+        Booleano,
+        Data
+    }
+
 }
