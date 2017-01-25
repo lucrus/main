@@ -152,7 +152,7 @@ public class EditText extends RelativeLayout {
             if (mList) {
                 et.setEnabled(false);
                 et.setCompoundDrawablesWithIntrinsicBounds(null, null,
-                        new DrawableAwesome.Builder(context, R.string.fa_chevron_down).setFakeBold(false).setSize(20).build()
+                        new DrawableAwesome.Builder(context, R.string.fa_ellipsis_h).setFakeBold(false).setSize(20).build()
                         , null);
             }
         }
