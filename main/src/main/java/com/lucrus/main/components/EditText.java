@@ -25,6 +25,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -50,15 +51,19 @@ import java.util.Random;
 public class EditText extends RelativeLayout {
     private android.widget.EditText et;
     private CheckBox cb;
+    private LinearLayout llRadio;
+    private List<TextView> mRadios;
+    private String mRadioValue;
     private TextView tvLabel, tvError;
     private int okColor = Color.parseColor("#3c763d"), errorColor = Color.parseColor("#843534"), neutralColor = Color.GRAY, focusColor = Color.parseColor("#FAB900"); //Color.YELLOW;
+    private Drawable radioChecked, radioUnchecked;
     private Drawable okDrawable, errorDrawable;
     private GradientDrawable mShape;
     private Button bPezz;
     private List<Validator> mValidators;
     private Boolean mValid;
     private List<String> mRelatedFields;
-    private boolean mCheck, mList;
+    private boolean mCheck, mList, mRadio;
     private TipoDato mTipoDato;
     private ArrayList<PopupListActivity.ListItem> mListItems = new ArrayList<>();
     private int mListRequestCode;
@@ -69,13 +74,7 @@ public class EditText extends RelativeLayout {
         @Override
         public void onClick(View v) {
             if (mList) {
-                Intent i = new Intent(getContext(), PopupListActivity.class);
-                i.putParcelableArrayListExtra(PopupListActivity.ITEMS_NAME, mListItems);
-                try {
-                    ((Activity) getContext()).startActivityForResult(i, mListRequestCode);
-                } catch (Exception e) {
-                    Utility.log(getContext(), e);
-                }
+                showDropdownList();
             } else {
                 handleOn();
             }
@@ -101,6 +100,11 @@ public class EditText extends RelativeLayout {
             mCheck = true;
         } else if (mTipoDato == TipoDato.Lista) {
             mList = true;
+        } else if (mTipoDato == TipoDato.Radio) {
+            mRadio = true;
+            mRadios = new ArrayList<>();
+            radioChecked = new DrawableAwesome.Builder(context, R.string.fa_check_circle_o).setFakeBold(false).setSize(20).build();
+            radioUnchecked = new DrawableAwesome.Builder(context, R.string.fa_circle_o).setFakeBold(false).setSize(20).build();
         }
         init(context);
         setType(mTipoDato);
@@ -128,7 +132,11 @@ public class EditText extends RelativeLayout {
         errorDrawable = new DrawableAwesome.Builder(context, R.string.fa_remove).setFakeBold(false).setSize(20).setColor(errorColor).build();
 
         View main;
-        if (mCheck) {
+        if (mRadio) {
+            llRadio = new LinearLayout(context);
+            llRadio.setOrientation(LinearLayout.VERTICAL);
+            main = llRadio;
+        } else if (mCheck) {
             cb = new CheckBox(context);
             main = cb;
         } else {
@@ -261,6 +269,16 @@ public class EditText extends RelativeLayout {
         }
     }
 
+    private void showDropdownList() {
+        Intent i = new Intent(getContext(), PopupListActivity.class);
+        i.putParcelableArrayListExtra(PopupListActivity.ITEMS_NAME, mListItems);
+        try {
+            ((Activity) getContext()).startActivityForResult(i, mListRequestCode);
+        } catch (Exception e) {
+            Utility.log(getContext(), e);
+        }
+    }
+
     private void setupButton() {
         if (mCheck) return;
         postDelayed(new Runnable() {
@@ -284,13 +302,22 @@ public class EditText extends RelativeLayout {
             cb.requestFocus();
         } else {
             resetOthers();
-            et.requestFocus();
-            InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-            imm.showSoftInput(et, 0);
-            mShape.setColor(focusColor);
-            bPezz.setVisibility(GONE);
-            if (et.getInputType() == InputType.TYPE_DATETIME_VARIATION_DATE) {
-                setDate(et);
+            if (mRadio) {
+                if (mRadios.size() > 0) {
+                    mRadios.get(0).requestFocus();
+                }
+            } else {
+                et.requestFocus();
+                InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.showSoftInput(et, 0);
+                mShape.setColor(focusColor);
+                bPezz.setVisibility(GONE);
+                if (et.getInputType() == InputType.TYPE_DATETIME_VARIATION_DATE) {
+                    setDate(et);
+                }
+                if (mList) {
+                    showDropdownList();
+                }
             }
         }
     }
@@ -351,7 +378,7 @@ public class EditText extends RelativeLayout {
     }
 
     private void reset() {
-        if (mCheck) return;
+        if (mCheck || mRadio) return;
         Log.d("EDIT-TEXT", et.getText().toString());
         mShape.setColor(Color.parseColor("#00000000"));
         bPezz.setVisibility(VISIBLE);
@@ -394,7 +421,9 @@ public class EditText extends RelativeLayout {
     }
 
     public Editable getText() {
-        if (mCheck) {
+        if (mRadio) {
+            return new SpannableStringBuilder(mRadioValue);
+        } else if (mCheck) {
             return new SpannableStringBuilder("" + cb.isChecked());
         } else {
             return et.getText();
@@ -403,7 +432,19 @@ public class EditText extends RelativeLayout {
 
     public void setText(CharSequence text) {
         if (mCheck) return;
-        et.setText(text);
+        if (mRadio) {
+            if (mRadios == null) return;
+            for (TextView t : mRadios) {
+                if (t.getTag().toString().equalsIgnoreCase(text.toString())) {
+                    t.setCompoundDrawablesWithIntrinsicBounds(null, null, radioChecked, null);
+                    mRadioValue = text.toString();
+                } else {
+                    t.setCompoundDrawablesWithIntrinsicBounds(null, null, radioUnchecked, null);
+                }
+            }
+        } else {
+            et.setText(text);
+        }
     }
 
     public void setChecked(boolean checked) {
@@ -436,7 +477,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public void setId(int id) {
-        if (mCheck) {
+        if (mRadio) {
+            //null per il momento credo che non mi serve nessun id
+        } else if (mCheck) {
             cb.setId(id);
         } else {
             et.setId(id);
@@ -445,7 +488,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public void setNextFocusForwardId(int id) {
-        if (mCheck) {
+        if (mRadio) {
+
+        } else if (mCheck) {
             cb.setNextFocusForwardId(id);
         } else {
             et.setNextFocusForwardId(id);
@@ -454,7 +499,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public void setNextFocusDownId(int id) {
-        if (mCheck) {
+        if (mRadio) {
+
+        } else if (mCheck) {
             cb.setNextFocusDownId(id);
         } else {
             et.setNextFocusDownId(id);
@@ -463,7 +510,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public void setNextFocusRightId(int id) {
-        if (mCheck) {
+        if (mRadio) {
+
+        } else if (mCheck) {
             cb.setNextFocusRightId(id);
         } else {
             et.setNextFocusRightId(id);
@@ -472,7 +521,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public void setNextFocusLeftId(int id) {
-        if (mCheck) {
+        if (mRadio) {
+
+        } else if (mCheck) {
             cb.setNextFocusLeftId(id);
         } else {
             et.setNextFocusLeftId(id);
@@ -481,7 +532,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public void setNextFocusUpId(int id) {
-        if (mCheck) {
+        if (mRadio) {
+
+        } else if (mCheck) {
             cb.setNextFocusUpId(id);
         } else {
             et.setNextFocusUpId(id);
@@ -490,7 +543,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public int getNextFocusForwardId() {
-        if (mCheck) {
+        if (mRadio) {
+            return 0;
+        } else if (mCheck) {
             if (cb == null) return 0;
             return cb.getNextFocusForwardId();
         } else {
@@ -501,7 +556,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public int getNextFocusDownId() {
-        if (mCheck) {
+        if (mRadio) {
+            return 0;
+        } else if (mCheck) {
             if (cb == null) return 0;
             return cb.getNextFocusDownId();
         } else {
@@ -512,7 +569,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public int getNextFocusRightId() {
-        if (mCheck) {
+        if (mRadio) {
+            return 0;
+        } else if (mCheck) {
             if (cb == null) return 0;
             return cb.getNextFocusRightId();
         } else {
@@ -523,7 +582,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public int getNextFocusLeftId() {
-        if (mCheck) {
+        if (mRadio) {
+            return 0;
+        } else if (mCheck) {
             if (cb == null) return 0;
             return cb.getNextFocusLeftId();
         } else {
@@ -534,7 +595,9 @@ public class EditText extends RelativeLayout {
 
     @Override
     public int getNextFocusUpId() {
-        if (mCheck) {
+        if (mRadio) {
+            return 0;
+        } else if (mCheck) {
             if (cb == null) return 0;
             return cb.getNextFocusUpId();
         } else {
@@ -578,6 +641,7 @@ public class EditText extends RelativeLayout {
             case Booleano:
                 break;
             case Lista:
+            case Radio:
                 break;
             case Data:
                 et.setInputType(InputType.TYPE_DATETIME_VARIATION_DATE);
@@ -663,18 +727,24 @@ public class EditText extends RelativeLayout {
                 tvError.setText("");
                 tvError.setVisibility(GONE);
                 tvLabel.setTextColor(okColor);
-                if (!mCheck) {
+                if (!mCheck && !mRadio && !mList) {
                     mShape.setStroke(1, okColor);
                     et.setCompoundDrawablesWithIntrinsicBounds(null, null, okDrawable, null);
+                }
+                if (mList) {
+                    mShape.setStroke(1, okColor);
                 }
             } else {
                 tvError.setText(v.errorMessage());
                 tvError.setVisibility(VISIBLE);
                 tvError.setTextColor(errorColor);
                 tvLabel.setTextColor(errorColor);
-                if (!mCheck) {
+                if (!mCheck && !mRadio && !mCheck) {
                     mShape.setStroke(1, errorColor);
                     et.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
+                }
+                if (mList) {
+                    mShape.setStroke(1, errorColor);
                 }
                 mValid = false;
                 break;
@@ -705,6 +775,32 @@ public class EditText extends RelativeLayout {
     public void setListItems(List<PopupListActivity.ListItem> listItems) {
         if (mListItems == null) return;
         this.mListItems.addAll(listItems);
+        if (mRadio) {
+            llRadio.removeAllViews();
+            for (PopupListActivity.ListItem li : mListItems) {
+                TextView tv = new TextView(getContext());
+                tv.setText(li.getValue());
+                tv.setTag(li.getId());
+                tv.setCompoundDrawablesWithIntrinsicBounds(null, null, radioUnchecked, null);
+                tv.setClickable(true);
+                tv.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        for (TextView tv : mRadios) {
+                            if (tv == v) {
+                                mRadioValue = tv.getTag().toString();
+                                tv.setCompoundDrawablesWithIntrinsicBounds(null, null, radioChecked, null);
+                            } else {
+                                tv.setCompoundDrawablesWithIntrinsicBounds(null, null, radioUnchecked, null);
+                            }
+                        }
+                    }
+                });
+                llRadio.addView(tv);
+                mRadios.add(tv);
+                mRadioValue = null;
+            }
+        }
     }
 
     public enum TipoDato {
@@ -713,7 +809,8 @@ public class EditText extends RelativeLayout {
         Numerico,
         Lista,
         Booleano,
-        Data
+        Data,
+        Radio
     }
 
 }
