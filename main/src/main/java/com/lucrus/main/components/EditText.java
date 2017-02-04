@@ -191,7 +191,8 @@ public class EditText extends RelativeLayout {
 
         setClickable(true);
 
-        if (mCheck) {
+        if (mRadio) {
+        } else if (mCheck) {
             cb.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -280,7 +281,7 @@ public class EditText extends RelativeLayout {
     }
 
     private void setupButton() {
-        if (mCheck) return;
+        if (mCheck || mRadio) return;
         postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -422,6 +423,7 @@ public class EditText extends RelativeLayout {
 
     public Editable getText() {
         if (mRadio) {
+            if (mRadioValue == null) mRadioValue = "";
             return new SpannableStringBuilder(mRadioValue);
         } else if (mCheck) {
             return new SpannableStringBuilder("" + cb.isChecked());
@@ -436,10 +438,10 @@ public class EditText extends RelativeLayout {
             if (mRadios == null) return;
             for (TextView t : mRadios) {
                 if (t.getTag().toString().equalsIgnoreCase(text.toString())) {
-                    t.setCompoundDrawablesWithIntrinsicBounds(null, null, radioChecked, null);
+                    t.setCompoundDrawablesWithIntrinsicBounds(radioChecked, null, null, null);
                     mRadioValue = text.toString();
                 } else {
-                    t.setCompoundDrawablesWithIntrinsicBounds(null, null, radioUnchecked, null);
+                    t.setCompoundDrawablesWithIntrinsicBounds(radioUnchecked, null, null, null);
                 }
             }
         } else {
@@ -781,7 +783,7 @@ public class EditText extends RelativeLayout {
                 TextView tv = new TextView(getContext());
                 tv.setText(li.getValue());
                 tv.setTag(li.getId());
-                tv.setCompoundDrawablesWithIntrinsicBounds(null, null, radioUnchecked, null);
+                tv.setCompoundDrawablesWithIntrinsicBounds(radioUnchecked, null, null, null);
                 tv.setClickable(true);
                 tv.setOnClickListener(new OnClickListener() {
                     @Override
@@ -789,11 +791,12 @@ public class EditText extends RelativeLayout {
                         for (TextView tv : mRadios) {
                             if (tv == v) {
                                 mRadioValue = tv.getTag().toString();
-                                tv.setCompoundDrawablesWithIntrinsicBounds(null, null, radioChecked, null);
+                                tv.setCompoundDrawablesWithIntrinsicBounds(radioChecked, null, null, null);
                             } else {
-                                tv.setCompoundDrawablesWithIntrinsicBounds(null, null, radioUnchecked, null);
+                                tv.setCompoundDrawablesWithIntrinsicBounds(radioUnchecked, null, null, null);
                             }
                         }
+                        validate(false);
                     }
                 });
                 llRadio.addView(tv);
