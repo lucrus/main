@@ -741,7 +741,7 @@ public class EditText extends RelativeLayout {
                 tvError.setVisibility(VISIBLE);
                 tvError.setTextColor(errorColor);
                 tvLabel.setTextColor(errorColor);
-                if (!mCheck && !mRadio && !mCheck) {
+                if (!mCheck && !mRadio && !mList) {
                     mShape.setStroke(1, errorColor);
                     et.setCompoundDrawablesWithIntrinsicBounds(null, null, errorDrawable, null);
                 }
@@ -781,10 +781,12 @@ public class EditText extends RelativeLayout {
             llRadio.removeAllViews();
             for (PopupListActivity.ListItem li : mListItems) {
                 TextView tv = new TextView(getContext());
-                tv.setText(li.getValue());
+                tv.setText("  " + li.getValue());
                 tv.setTag(li.getId());
                 tv.setCompoundDrawablesWithIntrinsicBounds(radioUnchecked, null, null, null);
                 tv.setClickable(true);
+                tv.setPadding(0, 5, 0, 5);
+                tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
                 tv.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
