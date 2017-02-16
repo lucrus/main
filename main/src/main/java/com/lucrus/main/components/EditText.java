@@ -808,6 +808,18 @@ public class EditText extends RelativeLayout {
         }
     }
 
+    public boolean isRadio() {
+        return mRadio;
+    }
+
+    public boolean isList() {
+        return mList;
+    }
+
+    public TipoDato getTipoDato() {
+        return mTipoDato;
+    }
+
     public enum TipoDato {
         None,
         Testo,
