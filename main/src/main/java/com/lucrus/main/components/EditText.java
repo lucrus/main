@@ -414,6 +414,10 @@ public class EditText extends RelativeLayout {
     public void setLabel(String label) {
         if (tvLabel != null) {
             tvLabel.setText(label);
+            if (mCheck) {
+                tvLabel.setVisibility(INVISIBLE);
+                cb.setText(label);
+            }
         }
     }
 

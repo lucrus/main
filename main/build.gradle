@@ -13,7 +13,7 @@ ext {
     siteUrl = 'http://lucarusso.global'
     gitUrl = 'https://github.com/lucrus/main.git'
 
-    libraryVersion = '0.0.18'
+    libraryVersion = '0.0.19'
 
     developerId = 'lucrus'
     developerName = 'Luca Russo'
@@ -28,11 +28,15 @@ android {
     compileSdkVersion 23
     buildToolsVersion "24.0.2"
 
+    lintOptions {
+        abortOnError false
+    }
+
     defaultConfig {
         minSdkVersion 15
         targetSdkVersion 23
-        versionCode 17
-        versionName "0.0.18"
+        versionCode 18
+        versionName "0.0.19"
     }
     buildTypes {
         release {
